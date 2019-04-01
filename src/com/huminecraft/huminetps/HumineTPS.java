@@ -2,6 +2,7 @@ package com.huminecraft.huminetps;
 
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.huminecraft.huminetps.commands.EnableCommand;
@@ -19,31 +20,38 @@ public class HumineTPS extends JavaPlugin {
     public void onEnable() {
 	consoleLog(Level.INFO, "Humine TPS " + VERSION + " by SDA loaded.");
 	getCommand("tpsEnable").setExecutor(new EnableCommand());
-	getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-	    long sec;
-	    long currentSec;
+	Bukkit.getServer().getScheduler().runTaskTimer(this, new Runnable() {
+
+	    long secstart;
+	    long secend;
+
 	    int ticks;
+
 	    @Override
 	    public void run() {
-		if (enabled) {
-		    sec = (System.currentTimeMillis() / 1000);
+		secstart = (System.currentTimeMillis() / 1000);
 
-		    if (currentSec == sec) {
-			ticks++;
-		    } else {
-			currentSec = sec;
-			tps = (tps == 0 ? ticks : ((tps + ticks) / 2));
-			ticks = 0;
-		    }
-		    
-		    consoleLog(Level.INFO, "Current tps : " + tps);
-		    
-		    if (tps < 18.50) {
-			HumineTPS.getInstance().getServer().dispatchCommand(HumineTPS.getInstance().getServer().getConsoleSender(), "restart");
-		    }
+		if (secstart == secend) {
+		    ticks++;
+		} else {
+		    secend = secstart;
+		    tps = (tps == 0) ? ticks : ((tps + ticks) / 2);
+		    ticks = 1;
 		}
-	   }
-	},0,60);
+	    }
+
+	}, 0, 1);
+	
+	Bukkit.getServer().getScheduler().runTaskTimer(this, new Runnable() {
+	    @Override
+	    public void run() {
+		if (tps < 18.5) {
+		    Bukkit.getServer().shutdown();
+		}
+		consoleLog(Level.INFO, "Current TPS : " + Math.round(tps));
+	    }
+
+	}, 1200, 1200);
     }
 
     public void onDisable() {
@@ -53,11 +61,11 @@ public class HumineTPS extends JavaPlugin {
     public boolean isTPSEnabled() {
 	return enabled;
     }
-    
+
     public void enableTPS(boolean bool) {
 	this.enabled = bool;
     }
-    
+
     public void consoleLog(Level level, String message) {
 	this.getServer().getLogger().log(level, message);
     }
