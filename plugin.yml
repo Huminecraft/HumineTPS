@@ -1,0 +1,9 @@
+main: com.huminecraft.huminetps.HumineTPS
+name: HumineTPS
+version: "1.0.0"
+description: HumineTPS plugin
+author: SDAChess
+commands:
+  tpsEnable:
+    description: Commande principale du plugin.
+    usage: "/<command>"
